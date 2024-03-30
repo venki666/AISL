@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluetooth test</title>
+</head>
+
+<body>
+    <h1> ESP32 BLE test web bluetooth API example </h1>
+     <button>CONNECT</button>
+    <h1></h1>
+    <div id="logs">Log output:</div>
+</body>
+
+</html>
+<script>
+    // Function to display logs on the website instead of console
+    function Log(msg){
+    document.querySelector('#logs').innerHTML =
+                    document.querySelector('#logs').innerHTML + "<br>" + msg
+    }
+
+    document.querySelector('button').addEventListener('click', async event => {
+        navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['4fafc201-1fb5-459e-8fcc-c5c9c331914b']
+        })
+        .then(device => { 
+            Log("connecting to " + device.name);
+            // Attempts to connect to remote GATT Server.
+            return device.gatt.connect();
+        })
+        .then(server => {
+            // Getting Service…
+            return server.getPrimaryService("4fafc201-1fb5-459e-8fcc-c5c9c331914b");
+        })
+        .then(service => {
+            // Getting Characteristic…
+            return service.getCharacteristic("beb5483e-36e1-4688-b7f5-ea07361b26a8");
+        })
+        .then(characteristic => {
+            // Reading value
+            return characteristic.readValue();
+        })
+        .then(value => {
+            Log(`Value is ${value.getUint8(0)}`);
+        })
+        .catch(error => { console.error(error); });
+    });
+</script>
